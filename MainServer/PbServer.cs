@@ -36,6 +36,8 @@ namespace MainServer
             base.OnStopped();
 
             pubsubClient.Stop();
+
+            WorkExecuter.Shutdown();
         }
 
         public void OnAllMessage(string message)

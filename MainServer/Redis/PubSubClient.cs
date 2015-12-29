@@ -5,8 +5,6 @@ using System.Text;
 using ServiceStack.Redis;
 using MainServer.Configuration;
 using SuperSocket.SocketBase.Logging;
-using System.Threading;
-using Amib.Threading;
 
 namespace MainServer.Redis
 {
@@ -46,14 +44,11 @@ namespace MainServer.Redis
 
         public ILog Logger { get; set; }
 
-        private SmartThreadPool stp_ = new SmartThreadPool(SmartThreadPool.DefaultIdleTimeout, 5, 1);
         private IChannelObserver observer_ = null;
 
         public PubSubClient(IChannelObserver observer)
         {
             observer_ =observer;
-
-            stp_.Start();
             Start();
         }
 
@@ -99,9 +94,11 @@ namespace MainServer.Redis
                         {
                             sub.UnSubscribeFromChannelsMatching(ch_pattern_);
                         }
-
-                        //send to threadpool, nonblock
-                        stp_.QueueWorkItem(() => { HandlerChannelMessage(channel, msg); });
+                        else
+                        {
+                            //process with another thread, nonblock
+                            WorkExecuter.STP.QueueWorkItem(() => { HandlerChannelMessage(channel, msg); });
+                        }
                     };
                     sub.SubscribeToChannelsMatching(ch_pattern_);
                 }
@@ -118,13 +115,12 @@ namespace MainServer.Redis
 
         public void Start()
         {
-            stp_.QueueWorkItem(SubscribeChannel);
+            WorkExecuter.STP.QueueWorkItem(SubscribeChannel);
         }
 
         public void Stop()
         {
             PublishToExit();
-            stp_.WaitForIdle();
         }
 
         public void PublishToAll(string message)

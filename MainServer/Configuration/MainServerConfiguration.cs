@@ -30,6 +30,18 @@ namespace MainServer.Configuration
             get { return (string)this["instanceName"]; }
         }
 
+        [ConfigurationProperty("maxTpSize", IsRequired = true)]
+        public int MaxTpSize
+        {
+            get { return (int)this["maxTpSize"]; }
+        }
+
+        [ConfigurationProperty("minTpSize", IsRequired = true)]
+        public int MinTpSize
+        {
+            get { return (int)this["minTpSize"]; }
+        }
+
         [ConfigurationProperty("redisChannel", IsRequired = true)]
         public RedisChannelElement RedisChannel
         {
