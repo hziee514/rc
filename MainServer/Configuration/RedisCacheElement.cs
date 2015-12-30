@@ -6,7 +6,7 @@ using System.Configuration;
 
 namespace MainServer.Configuration
 {
-    public class RedisDataElement : ConfigurationElement
+    public class RedisCacheElement : ConfigurationElement
     {
         [ConfigurationProperty("host", IsRequired = true)]
         public string Host

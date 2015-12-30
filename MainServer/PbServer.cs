@@ -20,9 +20,6 @@ namespace MainServer
 
         protected override void OnStarted()
         {
-            Console.WriteLine(MainServerConfiguration.Section.InstanceName);
-            Console.WriteLine(MainServerConfiguration.Section.RedisChannel.Host);
-
             pubsubClient = new PubSubClient(this)
             {
                 Logger = this.Logger

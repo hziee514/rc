@@ -11,8 +11,8 @@ namespace MainServer
     {
         private static SmartThreadPool stp_ = new SmartThreadPool(
             SmartThreadPool.DefaultIdleTimeout,
-            MainServerConfiguration.Section.MaxTpSize,
-            MainServerConfiguration.Section.MinTpSize);
+            MainServerSection.Section.MaxTpSize,
+            MainServerSection.Section.MinTpSize);
 
         static WorkExecuter()
         {

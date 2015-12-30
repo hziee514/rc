@@ -91,9 +91,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\PbMsg.cs" />
-    <Compile Include="Configuration\MainServerConfiguration.cs" />
+    <Compile Include="Configuration\MainServerSection.cs" />
     <Compile Include="Configuration\RedisChannelElement.cs" />
-    <Compile Include="Configuration\RedisDataElement.cs" />
+    <Compile Include="Configuration\RedisCacheElement.cs" />
     <Compile Include="PbHelper.cs" />
     <Compile Include="PbReceiveFilter.cs" />
     <Compile Include="PbServer.cs" />

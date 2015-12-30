@@ -6,19 +6,19 @@ using System.Configuration;
 
 namespace MainServer.Configuration
 {
-    public sealed class MainServerConfiguration : ConfigurationSection
+    public sealed class MainServerSection : ConfigurationSection
     {
         private const string SECTION_NAME = "mainServer";
 
-        private static MainServerConfiguration section_;
+        private static MainServerSection section_;
 
-        public static MainServerConfiguration Section
+        public static MainServerSection Section
         {
             get
             {
                 if (section_ == null)
                 {
-                    section_ = (MainServerConfiguration)ConfigurationManager.GetSection(SECTION_NAME);
+                    section_ = (MainServerSection)ConfigurationManager.GetSection(SECTION_NAME);
                 }
                 return section_;
             }
@@ -48,10 +48,10 @@ namespace MainServer.Configuration
             get { return this["redisChannel"] as RedisChannelElement; }
         }
 
-        [ConfigurationProperty("redisData", IsRequired = true)]
-        public RedisDataElement RedisData
+        [ConfigurationProperty("redisCache", IsRequired = true)]
+        public RedisCacheElement RedisCache
         {
-            get { return this["redisData"] as RedisDataElement; }
+            get { return this["redisCache"] as RedisCacheElement; }
         }
     }
 }

@@ -8,10 +8,16 @@ namespace MainServer.Configuration
 {
     public class RedisChannelElement : ConfigurationElement
     {
-        [ConfigurationProperty("namespace", IsRequired = true)]
-        public string Namespace
+        [ConfigurationProperty("globalNamespace", IsRequired = true)]
+        public string GlobalNamespace
         {
-            get { return (string)this["namespace"]; }
+            get { return (string)this["globalNamespace"]; }
+        }
+
+        [ConfigurationProperty("localNamespace", IsRequired = true)]
+        public string localNamespace
+        {
+            get { return (string)this["localNamespace"]; }
         }
 
         [ConfigurationProperty("separator", IsRequired = true)]

@@ -12,20 +12,22 @@ namespace MainServer.Redis
     {
         private static PooledRedisClientManager pool_;
 
-        private static string ns_ = MainServerConfiguration.Section.RedisChannel.Namespace;
-        public static readonly char Separator = MainServerConfiguration.Section.RedisChannel.Separator;
+        private static readonly string gns_ = MainServerSection.Section.RedisChannel.GlobalNamespace;
+        private static readonly string lns_ = MainServerSection.Section.RedisChannel.localNamespace;
 
-        private static string ch_prefix_ = ns_ + Separator;
-        private static string ch_pattern_ = ch_prefix_ + "*";
+        public static readonly char Separator = MainServerSection.Section.RedisChannel.Separator;
 
-        private static readonly string ch_all_ = ch_prefix_ + "all" + Separator;
+        private static readonly string gch_pattern_ = gns_ + Separator + "*";
+        private static readonly string lch_pattern_ = lns_ + Separator + "*";
 
-        private static readonly string ch_group_prefix_ = ch_prefix_ + "group" + Separator;
-        private static readonly string ch_socket_prefix_ = ch_prefix_ + "socket" + Separator;
+        private static readonly string lch_format_ = "" + Separator + "socket" + Separator;
 
-        private static readonly string ch_exit_ = ch_prefix_ + "exit" + Separator;
+        private static readonly string gch_all_ = gns_ + Separator + "all" + Separator;
+        private static readonly string gch_group_prefix_ = gns_ + Separator + "group" + Separator;
+        private static readonly string lch_socket_prefix_ = lns_ + Separator + "socket" + Separator;
+        private static readonly string lch_exit_ = lns_ + Separator + "exit" + Separator;
 
-        private static readonly string exit_msg_ = MainServerConfiguration.Section.InstanceName;
+        private static readonly string exit_msg_ = MainServerSection.Section.InstanceName;
 
         static PubSubClient()
         {
@@ -36,9 +38,9 @@ namespace MainServer.Redis
         {
             //auto started
             pool_ = new PooledRedisClientManager(
-                MainServerConfiguration.Section.RedisChannel.PoolSize,
-                MainServerConfiguration.Section.RedisChannel.Timeout,
-                MainServerConfiguration.Section.RedisChannel.Host
+                MainServerSection.Section.RedisChannel.PoolSize,
+                MainServerSection.Section.RedisChannel.Timeout,
+                MainServerSection.Section.RedisChannel.Host
                 );
         }
 
@@ -54,18 +56,18 @@ namespace MainServer.Redis
 
         private void HandlerChannelMessage(string channel, string msg)
         {
-            if (channel == ch_all_)
+            if (channel == gch_all_)
             {
                 observer_.OnAllMessage(msg);
             }
-            else if (channel.StartsWith(ch_socket_prefix_))
+            else if (channel.StartsWith(lch_socket_prefix_))
             {
-                var id = channel.Substring(ch_socket_prefix_.Length);
+                var id = channel.Substring(lch_socket_prefix_.Length);
                 observer_.OnSocketMessage(id, msg);
             }
-            else if (channel.StartsWith(ch_group_prefix_))
+            else if (channel.StartsWith(gch_group_prefix_))
             {
-                var id = channel.Substring(ch_group_prefix_.Length);
+                var id = channel.Substring(gch_group_prefix_.Length);
                 observer_.OnGroupMessage(id, msg);
             }
             else
@@ -90,9 +92,9 @@ namespace MainServer.Redis
                         {
                             Logger.DebugFormat("sub channel {0} msg {1}", channel, msg);
                         }
-                        if (channel == ch_exit_ && msg == exit_msg_)
+                        if (channel == lch_exit_ && msg == exit_msg_)
                         {
-                            sub.UnSubscribeFromChannelsMatching(ch_pattern_);
+                            sub.UnSubscribeFromChannelsMatching(gch_pattern_, lch_pattern_);
                         }
                         else
                         {
@@ -100,7 +102,7 @@ namespace MainServer.Redis
                             WorkExecuter.STP.QueueWorkItem(() => { HandlerChannelMessage(channel, msg); });
                         }
                     };
-                    sub.SubscribeToChannelsMatching(ch_pattern_);
+                    sub.SubscribeToChannelsMatching(gch_pattern_, lch_pattern_);
                 }
             }
             catch (Exception e)
@@ -125,22 +127,22 @@ namespace MainServer.Redis
 
         public void PublishToAll(string message)
         {
-            Publish(ch_all_, message);
+            Publish(gch_all_, message);
         }
 
         public void PublishToGroup(string groupId, string message)
         {
-            Publish(ch_group_prefix_ + groupId, message);
+            Publish(gch_group_prefix_ + groupId, message);
         }
 
-        public void PublishToSocket(string socketId, string message)
+        public void PublishToSocket(string ns, string socketId, string message)
         {
-            Publish(ch_socket_prefix_ + socketId, message);
+            Publish(ns + lch_format_ + socketId, message);
         }
 
         public void PublishToExit()
         {
-            Publish(ch_exit_, exit_msg_);
+            Publish(lch_exit_, exit_msg_);
         }
 
         private void Publish(string channel, string message)
